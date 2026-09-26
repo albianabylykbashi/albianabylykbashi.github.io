@@ -19,8 +19,9 @@
 }
 :root[data-theme="dark"]{ --paper:#0C1630; --card:#13203F; --mist:#172649; --line:#26375E; --ink:#E8EDF7; --muted:#A1AECB; }
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-behavior:smooth; scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
-body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+html{scroll-behavior:smooth; scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px); overflow-anchor:auto}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:clip}
+html{overflow-x:clip; -webkit-text-size-adjust:100%; text-size-adjust:100%}
 img{max-width:100%; display:block}
 a{color:inherit}
 button{font:inherit; color:inherit; cursor:pointer}
@@ -302,7 +303,7 @@ tr.hl td{background:color-mix(in srgb,var(--amber) 16%,transparent)}
 .stages button:last-child{background:var(--navy); color:#fff}
 .stages button:last-child i{color:var(--amber)}
 .traveller{position:absolute; top:-12px; left:0; width:22px; height:22px; border-radius:50%; background:var(--amber); box-shadow:0 0 0 6px color-mix(in srgb,var(--amber) 30%,transparent); z-index:2; transition:left .6s cubic-bezier(.4,.1,.2,1); pointer-events:none}
-.stagetext{margin-top:20px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:20px 22px; min-height:84px; display:flex; gap:18px; align-items:center}
+.stagetext{margin-top:20px; min-height:120px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:20px 22px; min-height:84px; display:flex; gap:18px; align-items:center}
 .stagetext b{font-family:var(--serif); font-size:1.35rem; white-space:nowrap}
 .stagetext span{color:var(--muted)}
 .pillars3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:28px}
@@ -316,7 +317,7 @@ tr.hl td{background:color-mix(in srgb,var(--amber) 16%,transparent)}
 .six svg{width:28px; height:28px; stroke:var(--sky); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
 .six b{display:block; font-size:1.08rem}
 .six span{color:var(--muted); font-size:.95rem}
-@media (max-width:900px){ .stages{grid-template-columns:repeat(4,1fr)} .traveller{display:none} .pillars3,.six{grid-template-columns:1fr} .stagetext{flex-direction:column; align-items:flex-start; gap:4px} }
+@media (max-width:900px){ .stagetext{min-height:150px} .stage{min-height:300px} .stages{grid-template-columns:repeat(4,1fr)} .traveller{display:none} .pillars3,.six{grid-template-columns:1fr} .stagetext{flex-direction:column; align-items:flex-start; gap:4px} }
 
 /* ---------- channels (tabs) ---------- */
 .tabs{display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-top:44px; border-bottom:1px solid var(--line); position:relative}
@@ -387,6 +388,7 @@ footer{background:var(--navy2); color:#8193BD; font-size:.85rem; padding:26px 0}
 /* reveal */
 .rv{opacity:0; transform:translateY(22px); transition:opacity .8s, transform .8s cubic-bezier(.2,.8,.2,1)}
 .rv.in{opacity:1; transform:none}
+@media (max-width:700px){ .rv{transform:translateY(10px); transition:opacity .5s, transform .5s} }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important; animation-delay:0s!important; transition-duration:.01ms!important; scroll-behavior:auto!important}
   .name .ch{transform:none} .rv{opacity:1; transform:none}
@@ -825,6 +827,7 @@ filters.addEventListener('click',e=>{
   const bt=e.target.closest('button'); if(!bt) return; const k=bt.dataset.ch;
   filters.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===bt));
   chdesc.textContent=CH[k][1];
+  grid.style.minHeight=grid.offsetHeight+'px'; setTimeout(()=>grid.style.minHeight='',500);
   const cards=[...grid.children]; const first=new Map(cards.map(c=>[c,c.getBoundingClientRect()]));
   cards.forEach(c=>{const b=B.find(x=>x.id===c.dataset.id); const show=k==='all'||b.c.includes(k); c.classList.toggle('gone',!show); c.classList.remove('out')});
   if(reduce) return;
@@ -840,10 +843,10 @@ function openBrand(id){
   if(b.film){ media=`<div class="filmlist" style="margin-top:56px">${b.films.map((f,i)=>`<a href="https://www.youtube.com/watch?v=${f[1]}" target="_blank" rel="noopener"><i><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1l10 6-10 6z" fill="#fff"/></svg></i><span><small>TV commercial ${i+1}</small>${f[0]}</span></a>`).join('')}</div>`; }
   else { media=`<div class="main"><img id="dMain" alt="${b.n} campaign image" src="${IMG[b.im[0]]}"></div><div class="thumbs">${b.im.map((m,i)=>`<button aria-label="Image ${i+1}" aria-current="${i===0}" data-m="${m}"><img alt="" src="${IMG[m]}"></button>`).join('')}</div>`; }
   dBody.innerHTML=`${media}<div class="d-sec">${b.s}</div><h3 id="dTitle">${b.n}</h3><div class="d-when">${b.w}</div><ul>${b.b.map(x=>`<li>${x}</li>`).join('')}</ul><div class="why"><b>Why it matters for the school</b>${b.y}</div>${b.h?`<p class="handle">${b.h}</p>`:''}`;
-  drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-  setTimeout(()=>document.getElementById('dClose').focus(),60);
+  drawer.classList.add('on'); scrim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); document.documentElement.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('dClose').focus({preventScroll:true}),60);
 }
-function closeBrand(){drawer.classList.remove('on'); scrim.classList.remove('on'); drawer.setAttribute('aria-hidden','true'); document.body.style.overflow=''; lastFocus&&lastFocus.focus()}
+function closeBrand(){drawer.classList.remove('on'); scrim.classList.remove('on'); drawer.setAttribute('aria-hidden','true'); document.documentElement.style.overflow=''; lastFocus&&lastFocus.focus({preventScroll:true})}
 grid.addEventListener('click',e=>{const c=e.target.closest('.brand'); if(c) openBrand(c.dataset.id)});
 dBody.addEventListener('click',e=>{const t=e.target.closest('.thumbs button'); if(!t) return; dBody.querySelectorAll('.thumbs button').forEach(x=>x.setAttribute('aria-current',x===t)); const m=document.getElementById('dMain'); m.src=IMG[t.dataset.m]; m.style.animation='none'; m.offsetWidth; m.style.animation=''});
 document.getElementById('dClose').onclick=closeBrand; scrim.onclick=closeBrand;
@@ -865,9 +868,12 @@ let cur=0, auto=null;
 function setStage(i){cur=i; const btns=[...stagesEl.querySelectorAll('button')]; btns.forEach((b,j)=>{b.setAttribute('aria-pressed',j===i); b.classList.toggle('lit',j<i)});
   document.getElementById('stageT').textContent=(i+1)+'. '+ST[i][0]; document.getElementById('stageD').textContent=ST[i][1];
   const b=btns[i]; trav.style.left=(b.offsetLeft+b.offsetWidth/2-11)+'px';}
-function startAuto(){ if(auto||reduce) return; auto=setInterval(()=>setStage((cur+1)%ST.length),2600)}
+let jVis=false; new IntersectionObserver(e=>{jVis=e[0].isIntersecting},{threshold:.3}).observe(document.querySelector('.journey'));
+function startAuto(){ if(auto||reduce) return; auto=setInterval(()=>{ if(jVis) setStage((cur+1)%ST.length) },2600)}
 function stopAuto(){clearInterval(auto); auto='stopped'}
-setStage(0); addEventListener('resize',()=>setStage(cur));
+setStage(0);
+let lastW=innerWidth;
+addEventListener('resize',()=>{ if(innerWidth===lastW) return; lastW=innerWidth; setStage(cur); const bs=[...tabs.querySelectorAll('button')]; const i=bs.findIndex(b=>b.getAttribute('aria-selected')==='true'); if(i>=0){ink.style.left=bs[i].offsetLeft+'px'; ink.style.width=bs[i].offsetWidth+'px'} });
 
 /* ---------- channels tabs ---------- */
 const TABS=[
@@ -884,10 +890,10 @@ TABS.forEach((t,i)=>{
   const b=document.createElement('button'); b.role='tab'; b.id='tab'+i; b.setAttribute('aria-controls','pan'+i); b.setAttribute('aria-selected',i===0); b.tabIndex=i===0?0:-1; b.textContent=t[0]; tabs.appendChild(b);
   const p=document.createElement('div'); p.className='panel'; p.id='pan'+i; p.role='tabpanel'; p.setAttribute('aria-labelledby','tab'+i); p.hidden=i!==0; p.innerHTML=t[1]; panels.appendChild(p);
 });
-function selTab(i,focus){const bs=[...tabs.querySelectorAll('button')]; bs.forEach((b,j)=>{b.setAttribute('aria-selected',j===i); b.tabIndex=j===i?0:-1; document.getElementById('pan'+j).hidden=j!==i}); ink.style.left=bs[i].offsetLeft+'px'; ink.style.width=bs[i].offsetWidth+'px'; if(focus) bs[i].focus(); bs[i].scrollIntoView({block:'nearest',inline:'nearest'})}
+function selTab(i,focus){const bs=[...tabs.querySelectorAll('button')]; bs.forEach((b,j)=>{b.setAttribute('aria-selected',j===i); b.tabIndex=j===i?0:-1; document.getElementById('pan'+j).hidden=j!==i}); ink.style.left=bs[i].offsetLeft+'px'; ink.style.width=bs[i].offsetWidth+'px'; if(focus) bs[i].focus({preventScroll:true}); const tl=bs[i].offsetLeft-24; if(tabs.scrollWidth>tabs.clientWidth) tabs.scrollTo({left:tl,behavior:reduce?'auto':'smooth'})}
 tabs.addEventListener('click',e=>{const b=e.target.closest('button'); if(b) selTab(+b.id.slice(3))});
 tabs.addEventListener('keydown',e=>{const bs=[...tabs.querySelectorAll('button')]; const i=bs.indexOf(document.activeElement); if(i<0) return; if(e.key==='ArrowRight') selTab((i+1)%bs.length,true); if(e.key==='ArrowLeft') selTab((i-1+bs.length)%bs.length,true)});
-requestAnimationFrame(()=>{const bs=[...tabs.querySelectorAll('button')]; ink.style.left=bs[0].offsetLeft+'px'; ink.style.width=bs[0].offsetWidth+'px'}); addEventListener('resize',()=>selTab([...tabs.querySelectorAll('button')].findIndex(b=>b.getAttribute('aria-selected')==='true')));
+requestAnimationFrame(()=>{const bs=[...tabs.querySelectorAll('button')]; ink.style.left=bs[0].offsetLeft+'px'; ink.style.width=bs[0].offsetWidth+'px'}); 
 
 /* ---------- months checklist ---------- */
 const M=[['November','Build',['Week 1: meet every partner; audit accounts and data','Week 2: HubSpot and WhatsApp live; website fixes','Week 3: PISA roundtable; TV rota starts','Week 4: first Open Day; first dashboard','Team trained; Koonta series filmed']],['December','Ignite',['“See for yourself” across every channel','Koonta series on air','6 Dec: Finland\'s Independence Day','Finnish winter market','Home for the holidays evening','Koonta Open in the winter break','Weekly budget moves to what books visits']],['January','Convert',['Open Day and scholarships announced','Mid year entry for relocating families','Follow up every December family','Enrolment campaign for 2027/28 begins','First quarterly report to the Chairman\'s Office']]];
